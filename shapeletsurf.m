@@ -229,5 +229,3 @@ function [slant, tilt, nscales, minradius, mult, opt] = checkargs(arg)
     if mult < 1
         error('scaling factor between successive filters should be greater than 1');
     end
-    
-
