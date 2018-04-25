@@ -1,7 +1,6 @@
 path = 'data02/';
-lambda = 0.5;
-sigma = 0.6;
-[resampled_img,light_dir] = uniformResample(path);
-ini_normal = getInitialNormal(resampled_img, light_dir);
-ref_normal = refineNormal(ini_normal,lambda,sigma);
-recSurf=surfReconstruct(ref_normal,2);
+[resampled_images,light_direction] = uniformResampling(path);
+initial_normal = getInitialNormal(resampled_images,light_direction);
+surf = shapeFromNormal(initial_normal,2);
+refined_normal = refineNormal(initial_normal,0.5,0.6);
+surf = shapeFromNormal(refined_normal,2);
