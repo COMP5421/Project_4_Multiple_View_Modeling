@@ -1,47 +1,54 @@
-function [Normal] = getInitialNormal(img, light_dir)
-[m,n,num_images] = size(img);
-image_ranks = zeros(m,n,num_images);
+function [normal] = getInitialNormal(images,light_dir)
+
+[m,n,num_img] = size(images);
+img_ranks = zeros(m,n,num_img);
 
 for i = 1:m
     for j = 1:n
-        pixels = img(i,j,:);
-        [~,I] = sort(pixels);
-        image_ranks(i,j,I) = 1:num_images;
+        [~,I] = sort(images(i,j,:));
+        I = reshape(I,[num_img,1]);
+        img_ranks(i,j,I) = 1:num_img;
     end
 end
 
-L =0.7*num_images;
-H = 0.9*num_images;
-count = 0;
-de_num = 0;
+pointer = 0;
+max = 0;
+L = 0.7*num_img;
+H = 0.9*num_img;
 
-for i = 1:num_images
-    image_rank = image_ranks(:,:,i);
-    image_rank = image_rank(image_rank>L);
-    if mean(image_rank)<H && size(image_rank,1)>count
-        count = length(image_rank);
-        de_num = i;
+for i = 1:num_img
+    count = 0;
+    for x = 1:m
+        for y = 1:n
+            s = img_ranks(x,y,i);
+            if s>L && s<H
+                count = count+1;
+            end
+        end
+    end
+    if count>max
+        pointer = i;
+        max = count;
     end
 end
 
-deno_img = img(:,:,de_num);
-img(:,:,de_num) = [];
-deno_light = light_dir(de_num,:);
-light_dir(de_num,:) = [];
+deno_img = images(:,:,pointer);
+images(:,:,pointer) = [];
+deno_light = light_dir(pointer,:);
+light_dir(pointer,:) = [];
 
-Normal = zeros(m,n,3);
+normal = zeros(m,n,3);
 
 for i = 1:m
     for j = 1:n
-        Ii = reshape((img(i,j,:)),[num_images-1,1]);
-        Ik = deno_img(i,j);
-        A = Ii*deno_light-Ik*light_dir;
+        I = reshape(images(i,j,:),[num_img-1,1]);
+        A = deno_img(i,j).*light_dir - I*deno_light;
         [~,~,v] = svd(A,0);
         x = v(:,end);
         if x(3)<0
             x = -x;
         end
-        Normal(i,j,:) = x;
+        normal(i,j,:) = x; % x is 3 by 1
     end
 end
 
