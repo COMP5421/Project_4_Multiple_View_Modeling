@@ -12,19 +12,19 @@ for i = 1:m
         z = T(3);
         slant(i,j) = acos(z);
         if y>=0
-            tilt(i,j) = acos(x/sqrt(x*x+y*y));
-        elseif y<=0
-            tilt(i,j) = 2*pi-acos(x/sqrt(x*x+y*y));
+            tilt(i,j) = acos(x);
+        elseif y<0
+            tilt(i,j) = -acos(x);
         end
     end
 end
 
-recsurf = shapeletsurf(slant, tilt, 8, 1, 2, 'slanttilt');
-recsurf=recsurf/scale;
-[x, y] = meshgrid(1:n, 1:m);
-figure;
+recsurf = shapeletsurf(slant,tilt,8,1,2,'slanttilt');
+recsurf = recsurf/scale;
+[x,y] = meshgrid(1:n, 1:m);
 
-surf(x,y,recsurf,'FaceColor','green','EdgeColor','none');
+figure;
+surf(x,y,recsurf,'FaceColor','cyan','EdgeColor','none');
 camlight left;
 lighting phong;
 axis equal;
