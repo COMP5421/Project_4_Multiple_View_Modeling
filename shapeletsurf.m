@@ -15,7 +15,7 @@
 % 
 %
 % Usage:
-%  recsurf = shapletsurf(slant, tilt, nscales, minradius, mult, opt)
+%  recsurf = shapletsurf(slant, tilt, nscales, minsigma, mult, opt)
 %                                       6        1        2
 % Arguments:
 %            slant     - 2D array of surface slant values across image.

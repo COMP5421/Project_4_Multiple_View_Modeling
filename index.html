@@ -1,0 +1,301 @@
+<html>
+<head>
+<title>COMP5421 Multiple View Modeling</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+}
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 0px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+p, li {
+	color: #444;
+}
+a {
+	color: #C7EDCC;
+}
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+#header {
+	background: #333;
+	width: 100%;
+}
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Xiyuan Liu, Shan Huang <span style="color: #DE3737; font-size: 20px"></span></h1>
+</div>
+</div>
+
+
+
+<div class="container">
+<h2 style="font-family:verdana">COMP5421 / Project 4 / Multiple View Modeling</h2>
+<div style="float: right; padding: 20px">
+<center>
+	<p><img src="html/painting.png" width="60%"/></p>
+</center>
+</div>
+</div>
+
+
+
+<div class="container">
+<h3><b>Overview</b></h3> 
+<p>
+	In this project we implement photometric stereo reconstruction. <br>
+	The reconstructed object is observed by a fixed camera under different illumination. So we have a dense set of images to start with. The challenge is to infer a 2.5D surface description of the object (that is, a depth model), despite that the captured data are severely contaminated by shadows, highlights, transparency and that the light calibration is inaccurate. The steps of the project are:<br>
+<ol>
+	<li>Initial normal estimation.</li>
+	<li>Normal refinement by MRF using graph cuts.</li>
+	<li>Depth reconstruction by shape-from-shapelets.</li>
+</ol>
+</p>
+</div>
+
+
+<div class="container">
+<h3><b>Initial Normal Estimation</b></h3> 
+
+<p><b>I. Uniform Resampling</b></p>
+<p>The noisy data we have corresponds to an unevenly scattered set on the light direction sphere, which will produce undesirable biases to the result. To produce uniform sampling of light directions, we start with an icosahedron, and perform subdivision on each face 4 times recursively. It produces a total of 1313 points uniformly sampled on the light direction sphere.
+<center>
+	<p><img src="html/icosphere_3.png" width="40%"/></p>
+</center>
+<p>Suppose the object is located at the center of the light direction sphere. Ideally, we want to illuminate the object along the line joining the center and one of the vertices of the subdivided icosahedron, such that uniform distribution can be achieved. In practice, we seek the nearest light direction Lo at one vertex in the subdivided icosahedron for each captured light direction Li, and interpolate the image Io at Lo by<br>
+<center>
+	<p><img src="html/resampling.png" width="40%"/></p>
+</center>
+<p>where V is a set of indices to the captured light direction closest to Lo. Uniform resampling is thus achieved.
+</p>
+</p>
+</p>
+
+
+<p><b>II. Find Denominator Image</b></p>
+<p>Complex objects contain textures and spatially varying albedos. By adopting a simple model, we choose an image that is shadow & highlight free to cancel out the surface albedo by producing <b>ratio images</b>.<br> An example is given below.<br>
+<div align="center">
+<table border=1>
+<tr>
+<td><b><font size="5">Image</font></b></td>
+<td><b><font size="5">Denominator Image</font></b></td>
+</tr>
+
+<tr>
+<td> <img src="html/image0001.bmp" width="100%"/> </td>
+<td> <img src="html/data08_denominator.bmp" width="100%"/> </td>
+</tr>
+</table>
+</div>	
+</p>
+
+
+<p><b>III. Local Normal Estimation</b></p>
+<p>After uniform resampling and obtaining a denominator image, we are ready to produce an initial normal for each pixel, which is needed for defining our energy functions.<br> Every pixel in an ratio image is expressed by<br>
+<center>
+	<p><img src="html/initial_normal_function_1.png" width="20%"/></p>
+</center>
+<p>
+	 Define N = (x, y, z)T ,L1 = (l1x, l1y, l1z)T and L2 = (l2x, l2y, l2z)T. For each of the pixel in a ratio image, we obtain a plane equation: Ax + By + Cz = 0<br>
+	 where A = I1l2x − I2l1x, B = I1l2y − I2l1y, C = I1l2z − I2l1z.<br>
+	 Then we can solve for the initial normal (x, y, z)T by singular value decomposition (SVD) which explicitly enforces that ||N|| = 1.<br>
+	 An example of initial normal is given below.
+</p>
+
+<div align="center">
+<table border=1>
+<tr>
+<td><b><font size="5">Image</font></b></td>
+<td><b><font size="5">Initial Normal</font></b></td>
+</tr>
+
+<tr>
+<td> <img src="html/image0001.bmp" width="100%"/> </td>
+<td> <img src="html/data08_Initial_Normal.jpg" width="100%"/> </td>
+</tr>
+</table>
+</div>	
+</p>
+
+</div>
+
+
+
+<div class="container">
+<h3><b>Normal Refinement by MRF Using Graph Cuts</b></h3> 
+
+
+</div>
+
+
+<div class="container">
+<h3><b>Depth Reconstruction by Shape-from-shapelets</b></h3> 
+<p>Given the refined normal on each pixel, it can be transferred to gradient by the following:</p>
+<center>
+	<p><img src="html/stg.jpg" width="60%"/></p>
+</center>
+<p>After get the slant and tilt, reconstruct the surface using shapeletsurf.m from Peter Kovesi's library. The denominator image is used as texture for the model. An example is shown below.</p>
+<center>
+	<p><img src="html/art08.png" width="30%"/></p>
+</center>
+</div>
+
+
+<div>
+<h3><b>Sample Results</b></h3> 
+<div align="center">
+<table border=1>
+<tr>
+<td><b><font size="5">Denominator Image</font></b></td>
+<td><b><font size="5">Initial Normal</font></b></td>
+<td><b><font size="5">Refined Normal</font></b></td>
+<td><b><font size="5">3D Model</font></b></td>
+<td><b><font size="5">Textured 3D Model</font></b></td>
+</tr>
+
+<tr>
+<td> <img src="html/deno02.bmp" width="100%"/> </td>
+<td> <img src="html/ini02.png" width="100%"/> </td>
+<td> <img src="html/ref02.png" width="100%"/> </td>
+<td> <img src="html/3D02.PNG" width="75%"/> </td>
+<td> <img src="html/art02.PNG" width="30%"/> </td>
+</tr>
+
+<tr>
+<td> <img src="html/deno04.bmp" width="100%"/> </td>
+<td> <img src="html/ini04.png" width="100%"/> </td>
+<td> <img src="html/ref04.png" width="100%"/> </td>
+<td> <img src="html/3D04.PNG" width="75%"/> </td>
+<td> <img src="html/art04.PNG" width="30%"/> </td>
+</tr>
+<tr>
+<td> <img src="html/deno07.bmp" width="100%"/> </td>
+<td> <img src="html/ini07.PNG" width="100%"/> </td>
+<td> <img src="html/ref07.PNG" width="100%"/> </td>
+<td> <img src="html/3D07.PNG" width="75%"/> </td>
+<td> <img src="html/art07.PNG" width="30%"/> </td>
+</tr>
+<tr>
+<td> <img src="html/deno09.bmp" width="100%"/> </td>
+<td> <img src="html/ini09.jpg" width="100%"/> </td>
+<td> <img src="html/ref09.jpg" width="100%"/> </td>
+<td> <img src="html/3D09.PNG" width="75%"/> </td>
+<td> <img src="html/art09.PNG" width="30%"/> </td>
+</tr>
+<tr>
+<td> <img src="html/deno10.bmp" width="100%"/> </td>
+<td> <img src="html/ini10.png" width="100%"/> </td>
+<td> <img src="html/ref10.png" width="100%"/> </td>
+<td> <img src="html/3D10.PNG" width="75%"/> </td>
+<td> <img src="html/art10.PNG" width="30%"/> </td>
+</tr>
+</table>
+</div>	
+
+</div>
+
+
+<center><p>
+	The END
+<p></center>
+
+</body>
+</html>

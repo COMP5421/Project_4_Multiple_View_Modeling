@@ -2,13 +2,16 @@ function [refined_normal] = refineNormal(initial_normal,lambda,sigma)
 
 [vertices,~] = icosphere(5);
 vertices = vertices(vertices(:,3)>0,:);
-[m,n,~] = size(initial_normal);
+[image_width,image_length,~] = size(initial_normal);
+normal = zeros(image_width*image_length,3);
 for i = 1:3
-    normal(:,i) = reshape(initial_normal(:,:,i),[m*n,1]);
+    normal(:,i) = reshape(initial_normal(:,:,i),[image_width*image_length,1]);
 end
+%normal = reshape(initial_normal,[],3);
 label = knnsearch(vertices,normal); % find the nearest neighbour for normal from vertices
 
-h = GCO_Create(m*n,length(vertices)); % (NumSties, NumLabels)
+
+h = GCO_Create(image_width*image_length,length(vertices)); % (NumSties, NumLabels)
 GCO_SetLabeling(h,label');
 datacost = int32(10000*pdist2(vertices,normal));
 GCO_SetDataCost(h,datacost);
@@ -16,42 +19,42 @@ smoothnesscost = pdist2(vertices,vertices);
 smoothnesscost = int32(10000*lambda*log10(1+smoothnesscost/(2*sigma*sigma)));
 GCO_SetSmoothCost(h,smoothnesscost);
 
-si = zeros((m-1)*n+(n-1)*m,1);
-for i = 1:n
-    for j = 1:m-1
-        si(j+(i-1)*(m-1)) = j+(i-1)*m;
+si = zeros((image_width-1)*image_length+(image_length-1)*image_width,1);
+for i = 1:image_length
+    for j = 1:image_width-1
+        si(j+(i-1)*(image_width-1)) = j+(i-1)*image_width;
     end
 end
-for i = 1:n-1
-    for j = 1:m
-        si((m-1)*n+(i-1)*m+j) = j+(i-1)*m;
-    end
-end
-
-sj = zeros((m-1)*n+(n-1)*m,1);
-sv = ones((m-1)*n+(n-1)*m,1);
-
-for i = 1:n
-    for j = 1:m-1
-        sj(j+(i-1)*(m-1)) = j+1+(i-1)*m;
-    end
-end
-for i = 1:n-1
-    for j = 1:m
-        sj((m-1)*n+(i-1)*m+j) = j+i*m;
+for i = 1:image_length-1
+    for j = 1:image_width
+        si((image_width-1)*image_length+(i-1)*image_width+j) = j+(i-1)*image_width;
     end
 end
 
-S = sparse(si,sj,sv,m*n,m*n);
+sj = zeros((image_width-1)*image_length+(image_length-1)*image_width,1);
+sv = ones((image_width-1)*image_length+(image_length-1)*image_width,1);
+
+for i = 1:image_length
+    for j = 1:image_width-1
+        sj(j+(i-1)*(image_width-1)) = j+1+(i-1)*image_width;
+    end
+end
+for i = 1:image_length-1
+    for j = 1:image_width
+        sj((image_width-1)*image_length+(i-1)*image_width+j) = j+i*image_width;
+    end
+end
+
+S = sparse(si,sj,sv,image_width*image_length,image_width*image_length);
 GCO_SetNeighbors(h,S);
 GCO_Expansion(h);
 labeling = GCO_GetLabeling(h);
 GCO_Delete(h);
 
-refined_normal = zeros(m,n,3);
-for i = 1:m
-    for j = 1:n
-        refined_normal(i,j,:) = vertices(labeling((j-1)*m+i),:);
+refined_normal = zeros(image_width,image_length,3);
+for i = 1:image_width
+    for j = 1:image_length
+        refined_normal(i,j,:) = vertices(labeling((j-1)*image_width+i),:);
     end
 end
 
