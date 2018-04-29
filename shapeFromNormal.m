@@ -1,4 +1,4 @@
-function [recsurf] = shapeFromNormal(normal,scale)
+function [recsurf] = shapeFromNormal(normal,scale,I)
 
 [m,n,~] = size(normal);
 slant = zeros(m,n);
@@ -24,7 +24,8 @@ recsurf = recsurf/scale;
 [x,y] = meshgrid(1:n, 1:m);
 
 figure;
-surf(x,y,recsurf,'FaceColor','cyan','EdgeColor','none');
+%surf(x,y,recsurf,'FaceColor','cyan','EdgeColor','none');
+surf(x,y,recsurf,I,'EdgeColor','none');
 camlight left;
 lighting phong;
 axis equal;
