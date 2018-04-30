@@ -218,7 +218,28 @@ table td img {
 
 <div class="container">
 <h3><b>Normal Refinement by MRF Using Graph Cuts</b></h3> 
+<p>
+	The energy function for graph cut minimization consists of two parts: E(N) = E_data(N) + E_smoothness(N) as specified below:<br>
+</p>
+<center>
+	<p><img src="html/energy.png" width="45%"/></p>
+</center>
+<p>
+	Then use gco library to construct the graph and perform energy minimization. Please refer to the paper for detailed algorithm.<br>
+</p>
+<div align="center">
+<table border=1>
+<tr>
+<td><b><font size="5">Initial Normal</font></b></td>
+<td><b><font size="5">Refined Normal</font></b></td>
+</tr>
 
+<tr>
+<td> <img src="html/ini08.png" width="100%"/> </td>
+<td> <img src="html/ref08.png" width="100%"/> </td>
+</tr>
+</table>
+</div>	
 
 </div>
 
@@ -253,7 +274,7 @@ table td img {
 <td> <img src="html/ini02.png" width="100%"/> </td>
 <td> <img src="html/ref02.png" width="100%"/> </td>
 <td> <img src="html/3D02.PNG" width="75%"/> </td>
-<td> <img src="html/art02.png" width="50%"/> </td>
+<td> <img src="html/art02.png" width="40%"/> </td>
 </tr>
 
 <tr>
@@ -261,28 +282,28 @@ table td img {
 <td> <img src="html/ini04.png" width="100%"/> </td>
 <td> <img src="html/ref04.png" width="100%"/> </td>
 <td> <img src="html/3D04.PNG" width="75%"/> </td>
-<td> <img src="html/art04.PNG" width="50%"/> </td>
+<td> <img src="html/art04.PNG" width="40%"/> </td>
 </tr>
 <tr>
 <td> <img src="html/deno07.bmp" width="100%"/> </td>
 <td> <img src="html/ini07.PNG" width="100%"/> </td>
 <td> <img src="html/ref07.PNG" width="100%"/> </td>
 <td> <img src="html/3D07.PNG" width="75%"/> </td>
-<td> <img src="html/art07.PNG" width="50%"/> </td>
+<td> <img src="html/art07.PNG" width="40%"/> </td>
 </tr>
 <tr>
 <td> <img src="html/deno09.bmp" width="100%"/> </td>
 <td> <img src="html/ini09.jpg" width="100%"/> </td>
 <td> <img src="html/ref09.jpg" width="100%"/> </td>
 <td> <img src="html/3D09.PNG" width="75%"/> </td>
-<td> <img src="html/art09.PNG" width="50%"/> </td>
+<td> <img src="html/art09.PNG" width="40%"/> </td>
 </tr>
 <tr>
 <td> <img src="html/deno10.bmp" width="100%"/> </td>
 <td> <img src="html/ini10.png" width="100%"/> </td>
 <td> <img src="html/ref10.png" width="100%"/> </td>
 <td> <img src="html/3D10.PNG" width="75%"/> </td>
-<td> <img src="html/art10.PNG" width="50%"/> </td>
+<td> <img src="html/art10.PNG" width="40%"/> </td>
 </tr>
 </table>
 </div>	
